@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+
+    <script src="../node_modules/nwjs-kremlin/reload.js"></script>
+
+    <%= jquery />
+    <script src="../node_modules/progressbar.js/dist/progressbar.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="./main.css">
+    <script src="meddler.ls.js"></script>
+    <script src="traffic.ls.js"></script>
+</head>
+<body>
+    <div id="ide">
+        <webview id="page" src="about:blank">
+        </webview>
+        <div id="traffic">
+            <table id="requests">
+            </table>
+        </div>
+    </div>
+</body>
+
+<!-- <script src="proxy.ls.js"></script> -->
+    
+</html>

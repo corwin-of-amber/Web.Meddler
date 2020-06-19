@@ -1,0 +1,25 @@
+{
+  "name": "web.meddler",
+  "main": "src/meddler.html",
+  "window": {
+    "width": 900,
+    "height": 700
+  },
+  "version": "0.0.0",
+  "chromium-args": "--ignore-certificate-errors --allow-running-insecure-content",
+  "dependencies": {
+    "concat-stream": "^1.6.2",
+    "http-proxy": "^1.18.1",
+    "jquery": "^3.5.1",
+    "mkdirp": "^1.0.4",
+    "progressbar.js": "^1.1.0",
+    "uuid": "^3.3.2"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": ""
+}

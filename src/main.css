@@ -1,0 +1,31 @@
+html, body {
+    height: 100vh;
+    margin: 0;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+#ide {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+#ide > * {
+    flex-basis: 0;
+    flex-grow: 1;
+}
+
+#traffic {
+    background-color: #f8f8f8;
+    border-top: 1px solid #eee;
+    overflow: auto;
+    padding: 9px;
+}
+
+div.download-progress {
+    display: inline-block;
+    width: 20px;
+}
