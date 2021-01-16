@@ -1,6 +1,6 @@
 {
   "name": "web.meddler",
-  "main": "src/meddler.html",
+  "main": "build/kremlin/index.html",
   "window": {
     "width": 900,
     "height": 700
@@ -15,9 +15,11 @@
     "progressbar.js": "^1.1.0",
     "uuid": "^3.3.2"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "@types/node": "^14.14.21"
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "kremlin build index.html"
   },
   "author": "",
   "license": "ISC",

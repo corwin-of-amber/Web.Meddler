@@ -18,6 +18,13 @@ html, body {
     flex-grow: 1;
 }
 
+#toolbar {
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 9;
+}
+
 #traffic {
     background-color: #f8f8f8;
     border-top: 1px solid #eee;

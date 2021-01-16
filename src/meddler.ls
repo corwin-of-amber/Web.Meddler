@@ -1,8 +1,8 @@
 fs = require 'fs'
+$ = require 'jquery'
 
-WEBSITE = 'http://www.mako.co.il/mako-vod-keshet/eretz_nehederet-s17/'
 #WEBSITE = 'http://towerdefense-kongregate.shinezone.com/?inner=true&region=us&kongregate_game_id=215952&kongregate_user_id=8045438&kongregate_username=corwin0amber&kongregate_game_auth_token=b88cd6c24c66ff52a09a4e40c263d996b1d033673270b43b88ab1c794909a0db'
-#WEBSITE = "http://google.co.il"
+WEBSITE = "http://google.co.il"
 #WEBSITE = "https://dts.co.il/LC_RegistrationDynamic/login.aspx"
 #WEBSITE = "http://iana.org"
 #WEBSITE = "http://localhost:3000/page.html"
@@ -15,13 +15,20 @@ LANDING_PAGE = '''
   <ul>
     <li> mako-tv
       <ul>
-        <li><a href="http://www.mako.co.il/mako-vod-keshet/eretz_nehederet-s17/">ארץ נהדרת</a></li>
+        <li><a href="http://www.mako.co.il/mako-vod-keshet/eretz_nehederet-s18/">ארץ נהדרת</a></li>
         <li><a href="https://www.mako.co.il/mako-vod-keshet/waking-bears">להעיר את הדב</a></li>
+      </ul>
+
+    <li> sdarot.tv
+      <ul>
+        <li><a href="https://sdarot.tv/watch/4691-%D7%A0%D7%97%D7%9E%D7%94-nechama/season/1/episode/9">נחמה</a></li>
       </ul>
     </li>
   </ul>
 </body>
 '''
+
+#WEBSITE = "https://sdarot.tv/watch/4691-%D7%A0%D7%97%D7%9E%D7%94-nechama/season/1/episode/9"
 
 
 FILE_RESOURCES =
@@ -32,8 +39,15 @@ RECORD_REQUESTS =
   * /[/]index_/
   * /[/](master|playlist)[.]m3u8/
   * /[/]app[.]js\b/
-  * /[.]js\b/
+  * /[/]recaptcha[^.]*[.]js\b/
+  * /[/]watch\b/
+  * /[.]mp4[?]\b/
+  * /[/]\d+[.]jpg\b/
 #  * /j7/
+
+BLOCK_REQUESTS =
+  * /[/]ajax[/]watch/
+  ...
 
 REDIRECT_REQUESTS =
 #  * /googlelogo_color/
@@ -48,7 +62,11 @@ FORCE_HTTP =
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
 
-FILTERS = fs.readFileSync('data/mako/adblock.txt', 'utf-8').split(/\n+/).filter(-> it.length)
+FILTER_FILES = ['data/mako/adblock.txt', 'data/sdarot/adblock.txt'] #, 'data/haaretz/adblock.txt']
+
+
+FILTERS = [].concat ...FILTER_FILES.map ->
+  fs.readFileSync(it, 'utf-8').split(/\n+/).filter(-> it.length)
 
 OVERRIDES =
   * {pat: /cast_sender[.]js/, local-file: 'data/mako/cast_sender.js'}
@@ -65,6 +83,13 @@ OVERRIDES =
 
 window.onload = ->
 
+  page = $('#page')[0]
+  window.page = page
+
+  $('button[name=reload]').on 'click', -> page.reload!
+  $('button[name=back]').on 'click', -> page.back!
+  $('button[name=home]').on 'click', -> goto-home!
+
   page.addEventListener 'contentload' (ev) ->
     console.log "%cload #{ev.target.src}" 'color:#99f'
     page.contentWindow.postMessage {}, '*'
@@ -73,12 +98,11 @@ window.onload = ->
     {
       name: 'rule',
       matches: ['<all_urls>'],
-      js: {files: ['src/site/mako/mako.js']},
+      js: {files: ['src/agent.js', 'src/site/mako/mako.js', 'src/site/haaretz/agent.js']},
       run_at: 'document_start'
     }
   ]
 
-  b = new Blob([LANDING_PAGE] type: 'text/html')
   #proxy = window.open("./site/kot/proxy.html", "proxy")
 
   page.request.onBeforeRequest.addListener (details) ->
@@ -89,8 +113,14 @@ window.onload = ->
     for filt in FILTERS
       filt = filt.replace(/^\|\|/, "")
       if details.url.indexOf(filt) >= 0
-        console.log "filter:", details.url, filt
+        console.log "%cfilter: %c#{details.url}%c #{filt}", \
+                    "color: red", "text-decoration: underline", "color: #800"
         return {cancel: true}
+
+    for re in RECORD_REQUESTS
+      if re.exec details.url
+        console.log details.requestId, details.requestBody
+        window.postMessage({$: 'request-body', request: details}, "*")
 
     for re in REDIRECT_REQUESTS
       if re.exec details.url
@@ -119,8 +149,12 @@ window.onload = ->
   page.request.onBeforeSendHeaders.addListener (details) ->
     for re in RECORD_REQUESTS
       if re.exec details.url
-        console.log details.requestId, details.url
+        console.log details.requestId, details.url, re
         window.postMessage({$: 'request', request: details}, "*")
+
+    for re in BLOCK_REQUESTS
+      if re.exec details.url
+        return {cancel: true}
 
     return {}
 
@@ -153,14 +187,20 @@ window.onload = ->
   , ['blocking', 'requestHeaders']
 
 
+  b = new Blob([LANDING_PAGE] type: 'text/html')
+  #home = URL.createObjectURL(b)
+  home = 'about:blank'
+  goto-home = -> page.src = home
+
+  window <<< {goto-home}
+
   #proxy.redirect-path = "https://dts.co.il/LC_RegistrationDynamic"  ## HACKACK
 
   #page.src = WEBSITE
   #window.open(WEBSITE, 'navigator')
   wipe page .then ->
     clear-all-cookies page
-    #setTimeout (-> page.src = WEBSITE), 100
-    setTimeout (-> page.src = URL.createObjectURL(b)), 100
+    setTimeout goto-home, 100
 
 
 

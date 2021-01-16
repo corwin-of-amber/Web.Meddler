@@ -1,5 +1,6 @@
 node_modules
 
+/build
 *.ls.js
 src/traffic.html
 src/meddler.html
